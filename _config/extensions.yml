@@ -1,0 +1,9 @@
+---
+Name: elemental-nested-extensions
+After:
+  - elemental
+---
+
+DNADesign\Elemental\Controllers\ElementalAreaController:
+  extensions:
+    - AKQA\ElementalNested\Extensions\ElementalAreaControllerExtension

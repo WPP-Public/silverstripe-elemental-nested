@@ -1,0 +1,11 @@
+en:
+  NestedItemList:
+    EMPTY: 'No items yet'
+    ADD_ITEM: 'Add item'
+  NestedItemRow:
+    DRAG: 'Drag to reorder'
+    SHOW: 'Show item'
+    HIDE: 'Hide item'
+    DUPLICATE: 'Duplicate'
+    DELETE: 'Delete'
+    MOVE_TO: 'Move to…'

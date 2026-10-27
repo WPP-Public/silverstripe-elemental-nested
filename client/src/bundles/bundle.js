@@ -1,0 +1,1 @@
+window.ss = window.ss || {};
