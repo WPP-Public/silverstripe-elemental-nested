@@ -1,5 +1,7 @@
 # silverstripe-elemental-nested
 
+[![CI](https://github.com/WPP-Public/silverstripe-elemental-nested/actions/workflows/ci.yml/badge.svg)](https://github.com/WPP-Public/silverstripe-elemental-nested/actions/workflows/ci.yml)
+
 Ordered nested items inside Elemental blocks for Silverstripe CMS 6.
 
 ## Overview
