@@ -47,7 +47,8 @@ class NestedItem extends DataObject
     public function getCMSFields(): FieldList
     {
         $fields = parent::getCMSFields();
-        $fields->removeByName(['ParentElementID', 'Sort']);
+        // Visibility is toggled from the nested item list rather than the form
+        $fields->removeByName(['ParentElementID', 'Sort', 'IsHidden']);
 
         return $fields;
     }
@@ -102,8 +103,10 @@ class NestedItem extends DataObject
     {
         parent::onBeforeWrite();
 
+        // Query all nested items, not just this subclass, so items of different
+        // types under the same parent don't share a Sort value.
         if (!$this->Sort && $this->ParentElementID) {
-            $max = (int) static::get()
+            $max = (int) NestedItem::get()
                 ->filter('ParentElementID', $this->ParentElementID)
                 ->max('Sort');
             $this->Sort = $max + 1;
@@ -133,8 +136,11 @@ class NestedItem extends DataObject
             return;
         }
 
+        // Force the write so the parent gets a new draft version even though its
+        // own fields haven't changed. Otherwise the parent still looks published
+        // and nested changes can't be published from the block.
         self::$touching_parent = true;
-        $parent->write();
+        $parent->write(false, false, true);
         self::$touching_parent = false;
     }
 

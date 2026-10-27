@@ -4,12 +4,19 @@ namespace AKQA\ElementalNested\Services;
 
 use AKQA\ElementalNested\Models\NestedItem;
 use InvalidArgumentException;
-use SilverStripe\Core\Convert;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\Queries\SQLUpdate;
+use SilverStripe\Core\Injector\Injectable;
 
+/**
+ * Positions a nested item among its siblings and renumbers the parent's items
+ * so Sort values stay unique and sequential.
+ *
+ * An $afterItemID of 0 moves an existing item to the top of the list, and
+ * appends a new item to the end of the list.
+ */
 class NestedItemReorder
 {
+    use Injectable;
+
     public function __construct(
         private NestedItem $item,
         private bool $itemIsNew = false
@@ -19,57 +26,48 @@ class NestedItemReorder
     public function reorder(int $afterItemID = 0, ?int $newParentElementID = null): NestedItem
     {
         $item = $this->item;
-        $oldParentId = (int) $item->ParentElementID;
-
-        if ($newParentElementID !== null && $newParentElementID !== $oldParentId) {
+        if ($newParentElementID !== null) {
             $item->ParentElementID = $newParentElementID;
         }
+        $parentID = (int) $item->ParentElementID;
 
-        $parentId = (int) $item->ParentElementID;
-        $currentPosition = (int) $item->Sort;
-        $sortAfterPosition = 0;
+        $siblings = NestedItem::get()
+            ->filter('ParentElementID', $parentID)
+            ->exclude('ID', $item->ID ?: 0)
+            ->sort('Sort', 'ASC')
+            ->toArray();
+        $siblingIDs = array_map(fn (NestedItem $sibling) => (int) $sibling->ID, $siblings);
 
         if ($afterItemID) {
-            /** @var NestedItem|null $afterItem */
-            $afterItem = NestedItem::get()->byID($afterItemID);
-            if (!$afterItem) {
-                throw new InvalidArgumentException(sprintf('NestedItem#%s not found', $afterItemID));
+            $position = array_search($afterItemID, $siblingIDs, true);
+            if ($position === false) {
+                throw new InvalidArgumentException(sprintf(
+                    'NestedItem#%s not found under parent element #%s',
+                    $afterItemID,
+                    $parentID
+                ));
             }
-            if ((int) $afterItem->ParentElementID !== $parentId) {
-                throw new InvalidArgumentException('After item belongs to a different parent element');
-            }
-            $sortAfterPosition = (int) $afterItem->Sort;
-        }
-
-        $baseTableName = Convert::raw2sql(DataObject::getSchema()->tableName(NestedItem::class));
-        $tableName = sprintf('"%s"', $baseTableName);
-
-        if ($afterItemID === 0) {
-            $max = (int) NestedItem::get()->filter('ParentElementID', $parentId)->max('Sort');
-            $item->Sort = $max + 1;
-            $item->write(skipValidation: $this->itemIsNew);
-            return $item;
-        }
-
-        if ($sortAfterPosition < $currentPosition || $oldParentId !== $parentId) {
-            $operator = '+';
-            $filter = "$tableName.\"Sort\" > $sortAfterPosition AND $tableName.\"Sort\" < $currentPosition";
-            $newPosition = $sortAfterPosition + 1;
+            $insertAt = $position + 1;
         } else {
-            $operator = '-';
-            $filter = "$tableName.\"Sort\" <= $sortAfterPosition AND $tableName.\"Sort\" > $currentPosition";
-            $newPosition = $sortAfterPosition;
+            $insertAt = $this->itemIsNew ? count($siblingIDs) : 0;
         }
 
-        if (!$this->itemIsNew && $currentPosition > 0 && $oldParentId === $parentId) {
-            SQLUpdate::create()
-                ->setTable($tableName)
-                ->assignSQL('"Sort"', "$tableName.\"Sort\" $operator 1")
-                ->addWhere([$filter, "$tableName.\"ParentElementID\"" => $parentId])
-                ->execute();
+        // Renumber siblings, leaving a gap for the item at $insertAt. Written via the
+        // ORM rather than a bulk SQL update so the new order is versioned and
+        // published along with the parent element.
+        $sort = 1;
+        foreach ($siblings as $index => $sibling) {
+            if ($index === $insertAt) {
+                $sort++;
+            }
+            if ((int) $sibling->Sort !== $sort) {
+                $sibling->Sort = $sort;
+                $sibling->write();
+            }
+            $sort++;
         }
 
-        $item->Sort = $newPosition;
+        $item->Sort = $insertAt + 1;
         $item->write(skipValidation: $this->itemIsNew);
 
         return $item;

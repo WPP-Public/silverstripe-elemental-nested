@@ -1,36 +1,33 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useContext } from 'react';
+import NestedElementContext from './NestedElementContext';
 import NestedItemList from './NestedItemList';
 
-const withNestedItems = (ElementComponent) => {
-  const Wrapped = (props) => {
-    const { element } = props;
-    const blockSchema = element?.blockSchema || {};
-    const hasNested = Array.isArray(blockSchema.allowedNestedTypes);
+const withNestedItems = (Content) => {
+  const ContentWithNestedItems = (props) => {
+    const context = useContext(NestedElementContext);
+    const blockSchema = context?.element?.blockSchema;
+
+    if (!blockSchema || !Array.isArray(blockSchema.allowedNestedTypes)) {
+      return <Content {...props} />;
+    }
 
     return (
-      <div className="nested-item-element-wrapper" data-element-block-id={element.id}>
-        <ElementComponent {...props} />
-        {hasNested && (
-          <NestedItemList
-            parentElementId={element.id}
-            nestedItems={blockSchema.nestedItems || []}
-            allowedNestedTypes={blockSchema.allowedNestedTypes || []}
-            canAddNested={blockSchema.canAddNested}
-          />
-        )}
-      </div>
+      <>
+        <Content {...props} />
+        <NestedItemList
+          parentId={Number(context.element.id)}
+          areaId={Number(context.areaId)}
+          nestedItems={blockSchema.nestedItems || []}
+          allowedTypes={blockSchema.allowedNestedTypes}
+          canAdd={Boolean(blockSchema.canAddNested)}
+        />
+      </>
     );
   };
 
-  Wrapped.propTypes = {
-    element: PropTypes.shape({
-      id: PropTypes.number,
-      blockSchema: PropTypes.object,
-    }).isRequired,
-  };
+  ContentWithNestedItems.displayName = `withNestedItems(${Content.displayName || Content.name || 'Content'})`;
 
-  return Wrapped;
+  return ContentWithNestedItems;
 };
 
 export default withNestedItems;

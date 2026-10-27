@@ -18,12 +18,32 @@ Apply `HasNestedItems` to any `BaseElement` subclass to manage a sorted list of 
 composer require akqa-nz/silverstripe-elemental-nested
 ```
 
-Build CMS assets (from this module directory, with Node 18+):
+The CMS editor bundle is committed in `client/dist`. To rebuild it (from this
+module directory, with Node 18+):
 
 ```bash
-yarn install
-yarn build
+npm ci
+npm run build
+npm test
+npm run lint
 ```
+
+## CMS editor
+
+![Nested items in the Elemental editor, with one list item open for inline editing](docs/images/nested-editor.png)
+
+Blocks with nested items show their items beneath the block in the Elemental
+editor. Each item is shown like a compact block (icon, type and summary) and can
+be edited inline, dragged to reorder, hidden, duplicated or removed. New items
+are added with one button per allowed type.
+
+Like Elemental's own inline forms, nested item forms have no save button of
+their own: edits mark the page as changed and are saved when the page is saved.
+Editing an item creates a new draft version of its parent block, so changes are
+published with the block or page.
+
+The editor extends the standard `ElementEditor` through Injector transforms on
+`Element` and `ElementContent`, so nested items move with their parent block.
 
 ## Usage
 

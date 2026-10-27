@@ -1,3 +1,12 @@
 ---
 Name: elemental-nested
+After:
+  - elemental
 ---
+SilverStripe\Admin\LeftAndMain:
+  extra_requirements_javascript:
+    - 'akqa-nz/silverstripe-elemental-nested:client/dist/js/bundle.js'
+  extra_requirements_css:
+    - 'akqa-nz/silverstripe-elemental-nested:client/dist/styles/bundle.css'
+  extra_requirements_i18n:
+    - 'akqa-nz/silverstripe-elemental-nested:client/lang'
