@@ -56,7 +56,7 @@ jobs:
       - uses: ramsey/composer-install@v3
 
       - name: Run PHPUnit
-        run: vendor/bin/phpunit -d memory_limit=512M
+        run: composer test
 
   phpcs:
     name: PHP coding standards

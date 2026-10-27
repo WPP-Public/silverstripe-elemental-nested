@@ -32,6 +32,19 @@ npm test
 npm run lint
 ```
 
+## Running the tests
+
+```bash
+composer install
+composer test
+```
+
+PHPUnit needs a database; set the usual `SS_DATABASE_*` environment variables.
+`composer test` copies a `Page` class from `tests/standalone` into `app/src`,
+since silverstripe/cms needs one and there's no project to provide it. That
+folder is excluded from the class manifest, so the fixture can't clash with a
+project's own `Page` when the module is installed.
+
 ## CMS editor
 
 ![Nested items in the Elemental editor, with one list item open for inline editing](docs/images/nested-editor.png)

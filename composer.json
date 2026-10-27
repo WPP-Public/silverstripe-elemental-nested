@@ -41,7 +41,10 @@
         }
     },
     "scripts": {
-        "test": "phpunit -d memory_limit=512M",
+        "test": [
+            "@php -r \"is_dir('app/src') || mkdir('app/src', 0777, true); copy('tests/standalone/Page.php', 'app/src/Page.php');\"",
+            "phpunit -d memory_limit=512M"
+        ],
         "lint": "phpcs src tests",
         "lint:fix": "phpcbf src tests"
     }
