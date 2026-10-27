@@ -1,5 +1,7 @@
 # silverstripe-elemental-nested
 
+[![CI](https://github.com/WPP-Public/silverstripe-elemental-nested/actions/workflows/ci.yml/badge.svg)](https://github.com/WPP-Public/silverstripe-elemental-nested/actions/workflows/ci.yml)
+
 Ordered nested items inside Elemental blocks for Silverstripe CMS 6.
 
 ## Overview
@@ -18,8 +20,10 @@ Apply `HasNestedItems` to any `BaseElement` subclass to manage a sorted list of 
 composer require akqa-nz/silverstripe-elemental-nested
 ```
 
-The CMS editor bundle is committed in `client/dist`. To rebuild it (from this
-module directory, with Node 18+):
+The CMS editor bundle is committed in `client/dist`, and CI checks it matches
+a fresh build. `.browserslistrc` pins the browser targets so the build is the
+same wherever the module is checked out, including inside a project's `vendor/`
+folder. To rebuild it (from this module directory, with Node 18):
 
 ```bash
 npm ci
@@ -27,6 +31,19 @@ npm run build
 npm test
 npm run lint
 ```
+
+## Running the tests
+
+```bash
+composer install
+composer test
+```
+
+PHPUnit needs a database; set the usual `SS_DATABASE_*` environment variables.
+`composer test` copies a `Page` class from `tests/standalone` into `app/src`,
+since silverstripe/cms needs one and there's no project to provide it. That
+folder is excluded from the class manifest, so the fixture can't clash with a
+project's own `Page` when the module is installed.
 
 ## CMS editor
 

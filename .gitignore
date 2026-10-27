@@ -3,3 +3,5 @@
 composer.lock
 .phpunit.result.cache
 coverage/
+# Created by `composer test` for standalone runs
+/app/

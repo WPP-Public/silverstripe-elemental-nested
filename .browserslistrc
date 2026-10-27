@@ -1,0 +1,3 @@
+# Keep builds independent of any project this module is installed in, whose
+# own browserslist config would otherwise be picked up from a parent folder.
+defaults
