@@ -1,11 +1,15 @@
 en:
-  NestedItemList:
-    EMPTY: 'No items yet'
-    ADD_ITEM: 'Add item'
-  NestedItemRow:
+  NestedItem:
     DRAG: 'Drag to reorder'
-    SHOW: 'Show item'
-    HIDE: 'Hide item'
     DUPLICATE: 'Duplicate'
-    DELETE: 'Delete'
-    MOVE_TO: 'Move to…'
+    EDIT: 'Edit this {type}'
+    EMPTY: 'Not filled in yet'
+    HIDDEN: 'Hidden'
+    HIDE: 'Hide'
+    REMOVE: 'Remove'
+    SHOW: 'Show'
+    UNSAVED: 'Unsaved changes'
+  NestedItemList:
+    ADD: 'Add'
+    CONFIRM_DELETE: 'Are you sure you want to remove this {type}?'
+    EMPTY: 'No items yet'

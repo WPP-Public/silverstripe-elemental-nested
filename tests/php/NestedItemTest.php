@@ -74,6 +74,8 @@ class NestedItemTest extends SapphireTest
 
     public function testPermissionsDelegateToParent(): void
     {
+        $this->logInWithPermission('ADMIN');
+
         $area = ElementalArea::create();
         $area->write();
 
