@@ -30,6 +30,8 @@ npm run lint
 
 ## CMS editor
 
+![Nested items in the Elemental editor, with one list item open for inline editing](docs/images/nested-editor.png)
+
 Blocks with nested items show their items beneath the block in the Elemental
 editor. Each item is shown like a compact block (icon, type and summary) and can
 be edited inline, dragged to reorder, hidden, duplicated or removed. New items
