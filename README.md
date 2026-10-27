@@ -20,8 +20,10 @@ Apply `HasNestedItems` to any `BaseElement` subclass to manage a sorted list of 
 composer require akqa-nz/silverstripe-elemental-nested
 ```
 
-The CMS editor bundle is committed in `client/dist`. To rebuild it (from this
-module directory, with Node 18+):
+The CMS editor bundle is committed in `client/dist`, and CI checks it matches
+a fresh build. `.browserslistrc` pins the browser targets so the build is the
+same wherever the module is checked out, including inside a project's `vendor/`
+folder. To rebuild it (from this module directory, with Node 18):
 
 ```bash
 npm ci
