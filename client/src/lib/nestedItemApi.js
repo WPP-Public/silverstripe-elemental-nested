@@ -18,8 +18,11 @@ const post = (action, body) => backend.post(
   { 'X-SecurityID': Config.get('SecurityID') }
 );
 
-export const createItem = (parentID, className, afterID = 0) => post('create', { parentID, className, afterID })
-  .then((response) => response.json());
+// afterID 0 appends to the end of the list, or inserts at the top with atStart
+export const createItem = (parentID, className, afterID = 0, atStart = false) => post(
+  'create',
+  { parentID, className, afterID, atStart }
+).then((response) => response.json());
 
 export const deleteItem = (id) => post('delete', { id });
 

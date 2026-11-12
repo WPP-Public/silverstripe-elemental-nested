@@ -11,7 +11,8 @@ use SilverStripe\Core\Injector\Injectable;
  * so Sort values stay unique and sequential.
  *
  * An $afterItemID of 0 moves an existing item to the top of the list, and
- * appends a new item to the end of the list.
+ * appends a new item to the end of the list unless $atStart is set, which
+ * inserts it at the top instead.
  */
 class NestedItemReorder
 {
@@ -23,7 +24,7 @@ class NestedItemReorder
     ) {
     }
 
-    public function reorder(int $afterItemID = 0, ?int $newParentElementID = null): NestedItem
+    public function reorder(int $afterItemID = 0, ?int $newParentElementID = null, bool $atStart = false): NestedItem
     {
         $item = $this->item;
         if ($newParentElementID !== null) {
@@ -49,7 +50,7 @@ class NestedItemReorder
             }
             $insertAt = $position + 1;
         } else {
-            $insertAt = $this->itemIsNew ? count($siblingIDs) : 0;
+            $insertAt = $this->itemIsNew && !$atStart ? count($siblingIDs) : 0;
         }
 
         // Renumber siblings, leaving a gap for the item at $insertAt. Written via the

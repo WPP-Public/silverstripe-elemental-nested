@@ -223,3 +223,138 @@ $nested-accent: #0071c4;
     }
   }
 }
+
+// Insert point between nested items. Mirrors elemental's
+// `.element-editor__hover-bar`: a zero-height row whose button straddles the
+// gap between items, revealing a line and plus icon on hover or focus.
+$nested-hover-bar-transition: all ease .2s;
+
+.nested-item-hover-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 0;
+  margin-top: -.1875rem; // centre on the gap below the previous item
+  margin-bottom: .1875rem;
+  list-style: none;
+
+  // Straddles the top edge of the first item
+  &:first-child {
+    margin: 0;
+  }
+
+  &__area {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-height: .75rem;
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    border: 0;
+    outline: none;
+    transition: $nested-hover-bar-transition;
+
+    &:disabled {
+      cursor: default;
+    }
+
+    &:not(:disabled):hover,
+    &:focus-visible,
+    &--focus {
+      outline: none;
+
+      .nested-item-hover-bar__area-inner {
+        margin: 0 1rem;
+      }
+
+      .nested-item-hover-bar__line {
+        opacity: 1;
+        max-height: 3px;
+        border-radius: 3px;
+
+        &::before {
+          transform: translateY(calc(1.5px - 50%)) scale(1);
+        }
+      }
+    }
+  }
+
+  &__area-inner {
+    position: relative;
+    display: block;
+    margin: 0;
+    transition: $nested-hover-bar-transition;
+  }
+
+  &__line {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    max-height: 0;
+    padding: 0;
+    background-color: $nested-accent;
+    border: 0;
+    border-radius: 0;
+    opacity: 0;
+    transform: translateY(-66%);
+    transition: $nested-hover-bar-transition;
+
+    &::before {
+      position: relative;
+      z-index: 2;
+      right: -.5em;
+      display: block;
+      height: 1em;
+      margin-right: 50%;
+      color: $nested-accent;
+      font-size: 1.125rem;
+      background-image: radial-gradient(#fff 50%, transparent 50%);
+      transform: translateY(calc(-1px - 50%)) scale(0);
+      transition: $nested-hover-bar-transition;
+    }
+  }
+
+  &__popover .popover-body {
+    padding: .25rem;
+  }
+
+  &__types {
+    display: flex;
+    flex-direction: column;
+    min-width: 10rem;
+  }
+
+  &__type {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .375rem .5rem;
+    color: #303b4d;
+    font-size: .8125rem;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-radius: .2rem;
+
+    &::before {
+      flex: 0 0 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      line-height: 1.5rem;
+      text-align: center;
+      color: #43536d;
+      background: #f1f3f6;
+      border-radius: .25rem;
+    }
+
+    &:hover,
+    &:focus {
+      color: $nested-accent;
+      background: $nested-hover;
+    }
+  }
+}

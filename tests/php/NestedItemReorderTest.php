@@ -81,6 +81,17 @@ class NestedItemReorderTest extends SapphireTest
         $this->assertSame([$a, $b, (int) $item->ID], $this->sortedIds());
     }
 
+    public function testNewItemCanBeInsertedAtStart(): void
+    {
+        [$a, $b] = $this->createItems(2);
+
+        $item = LinkItem::create(['ParentElementID' => $this->block->ID]);
+        NestedItemReorder::create($item, true)->reorder(0, null, true);
+
+        $this->assertSame([(int) $item->ID, $a, $b], $this->sortedIds());
+        $this->assertSame([1, 2, 3], $this->sortValues());
+    }
+
     public function testReorderedSiblingsArePublishedWithTheParent(): void
     {
         [$a, $b, $c] = $this->createItems(3);

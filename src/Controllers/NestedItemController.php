@@ -93,6 +93,8 @@ class NestedItemController extends FormSchemaController
         $className = (string) $this->getPostedJsonValue($request, 'className');
         $data = json_decode($request->getBody(), true) ?: [];
         $afterID = isset($data['afterID']) ? (int) $data['afterID'] : 0;
+        // With no afterID, insert at the top rather than append
+        $atStart = !empty($data['atStart']);
 
         $parent = $this->getParentElement($parentID);
         if (!$parent || !$this->assertCanManageNested($parent)) {
@@ -115,7 +117,7 @@ class NestedItemController extends FormSchemaController
 
         $item->ParentElementID = $parentID;
         $reorderer = Injector::inst()->create(NestedItemReorder::class, $item, true);
-        $reorderer->reorder($afterID);
+        $reorderer->reorder($afterID, null, $atStart);
 
         return $this->jsonSuccess(201, ['id' => $item->ID]);
     }

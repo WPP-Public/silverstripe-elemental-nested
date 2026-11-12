@@ -22,6 +22,7 @@ import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifi
 import * as api from '../lib/nestedItemApi';
 import NestedItem from './NestedItem';
 import AddNestedItem from './AddNestedItem';
+import NestedItemHoverBar from './NestedItemHoverBar';
 
 const notify = (text, type = 'error') => {
   window.jQuery?.noticeAdd({ text, type, stayTime: 5000 });
@@ -36,6 +37,7 @@ const NestedItemList = ({ parentId, areaId, nestedItems, allowedTypes, canAdd })
   const [items, setItems] = useState(nestedItems);
   const [expandedId, setExpandedId] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     setItems(nestedItems);
@@ -68,7 +70,12 @@ const NestedItemList = ({ parentId, areaId, nestedItems, allowedTypes, canAdd })
       .finally(() => setBusy(false));
   }, [nestedItems, reloadArea]);
 
+  const handleDragStart = useCallback(() => setDragging(true), []);
+
+  const handleDragCancel = useCallback(() => setDragging(false), []);
+
   const handleDragEnd = useCallback(({ active, over }) => {
+    setDragging(false);
     if (!over || active.id === over.id) {
       return;
     }
@@ -83,13 +90,32 @@ const NestedItemList = ({ parentId, areaId, nestedItems, allowedTypes, canAdd })
     run(api.sortItem(active.id, parentId, afterId));
   }, [itemIds, items, parentId, run]);
 
+  const expandCreated = useCallback((result) => {
+    if (result?.id) {
+      setExpandedId(result.id);
+    }
+  }, []);
+
   // afterID 0 appends new items to the end of the list
   const handleAdd = useCallback((className) => run(api.createItem(parentId, className, 0))
-    .then((result) => {
-      if (result?.id) {
-        setExpandedId(result.id);
-      }
-    }), [parentId, run]);
+    .then(expandCreated), [parentId, run, expandCreated]);
+
+  // From a hover bar: after the given item, or at the top when afterId is 0
+  const handleInsert = useCallback((className, afterId) => run(
+    api.createItem(parentId, className, afterId, afterId === 0)
+  ).then(expandCreated), [parentId, run, expandCreated]);
+
+  const showHoverBars = canAdd && !dragging;
+  const renderHoverBar = (afterId) => showHoverBars && (
+    <NestedItemHoverBar
+      key={`insert-after-${afterId}`}
+      parentId={parentId}
+      afterId={afterId}
+      allowedTypes={allowedTypes}
+      onAdd={handleInsert}
+      disabled={busy}
+    />
+  );
 
   const handleDelete = useCallback((item) => {
     const message = i18n.inject(
@@ -127,22 +153,27 @@ const NestedItemList = ({ parentId, areaId, nestedItems, allowedTypes, canAdd })
           sensors={sensors}
           collisionDetection={closestCenter}
           modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
           onDragEnd={handleDragEnd}
         >
           <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
             <ul className="nested-item-list__items">
+              {renderHoverBar(0)}
               {items.map((item) => (
-                <NestedItem
-                  key={item.id}
-                  item={item}
-                  expanded={expandedId === item.id}
-                  onToggleExpand={() => setExpandedId(expandedId === item.id ? null : item.id)}
-                  onDelete={() => handleDelete(item)}
-                  onDuplicate={() => handleDuplicate(item)}
-                  onToggleHidden={() => handleToggleHidden(item)}
-                  onSaved={handleSaved}
-                  onValidationError={() => setExpandedId(item.id)}
-                />
+                <React.Fragment key={item.id}>
+                  <NestedItem
+                    item={item}
+                    expanded={expandedId === item.id}
+                    onToggleExpand={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                    onDelete={() => handleDelete(item)}
+                    onDuplicate={() => handleDuplicate(item)}
+                    onToggleHidden={() => handleToggleHidden(item)}
+                    onSaved={handleSaved}
+                    onValidationError={() => setExpandedId(item.id)}
+                  />
+                  {renderHoverBar(item.id)}
+                </React.Fragment>
               ))}
             </ul>
           </SortableContext>

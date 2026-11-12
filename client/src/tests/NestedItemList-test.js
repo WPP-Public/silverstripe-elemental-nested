@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import NestedItemList from '../components/NestedItemList';
 
 const mockDispatch = jest.fn();
@@ -67,6 +67,41 @@ describe('NestedItemList', () => {
     expect(api.createItem).toHaveBeenCalledWith(10, 'LinkItem', 0);
     await screen.findByText('https://visible.test');
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'FORCE_RELOAD', payload: { elementEditorId: 5 } });
+  });
+
+  it('shows an insert point above the first item and after each item', () => {
+    render(<NestedItemList {...props} />);
+
+    expect(screen.getAllByRole('button', { name: 'Add new item here' })).toHaveLength(3);
+  });
+
+  it('hides insert points when items cannot be added', () => {
+    render(<NestedItemList {...props} canAdd={false} />);
+
+    expect(screen.queryByRole('button', { name: 'Add new item here' })).toBeNull();
+  });
+
+  it('inserts a new item between two items from an insert point', async () => {
+    render(<NestedItemList {...props} />);
+
+    // The second insert point sits between items 1 and 2
+    fireEvent.click(screen.getAllByRole('button', { name: 'Add new item here' })[1]);
+    const popover = await screen.findByRole('tooltip');
+    fireEvent.click(within(popover).getByRole('button', { name: 'Link' }));
+
+    expect(api.createItem).toHaveBeenCalledWith(10, 'LinkItem', 1, false);
+    await waitFor(() => expect(mockDispatch).toHaveBeenCalled());
+  });
+
+  it('inserts a new item at the top from the first insert point', async () => {
+    render(<NestedItemList {...props} />);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Add new item here' })[0]);
+    const popover = await screen.findByRole('tooltip');
+    fireEvent.click(within(popover).getByRole('button', { name: 'Link' }));
+
+    expect(api.createItem).toHaveBeenCalledWith(10, 'LinkItem', 0, true);
+    await waitFor(() => expect(mockDispatch).toHaveBeenCalled());
   });
 
   it('removes an item after confirmation', async () => {
